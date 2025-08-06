@@ -1,88 +1,90 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const FeedbackForm = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    rating: '',
-    feedback: ''
-  });
-
-  const [submittedData, setSubmittedData] = useState(null);
-  const [message, setMessage] = useState('');
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+function FeedbackForm() {
+  const [name, setName] = useState('');
+  const [rating, setRating] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [msg, setMsg] = useState('');
+  const [isError, setIsError] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const data = {
+      name: name,
+      rating: rating,
+      feedback: feedback,
+    };
+
     try {
-      const response = await axios.post('http://localhost:5000/api/feedback', formData);
-      setMessage(response.data.message);
-      setSubmittedData(formData); 
-      setFormData({ name: '', rating: '', feedback: '' }); 
-    } catch (error) {
-      setMessage('Error submitting feedback');
-      console.error(error);
+      await axios.post('http://localhost:5000/api/feedback', data);
+      setMsg('Feedback submitted successfully!');
+      setIsError(false);
+      setName('');
+      setRating('');
+      setFeedback('');
+    } catch (err) {
+      console.error(err);
+      setMsg('Something went wrong. Please try again.');
+      setIsError(true);
     }
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-semibold mb-4 text-center">Feedback Form</h2>
-      
-      {message && (
-        <div className="mb-4 p-3 rounded text-white bg-green-500">{message}</div>
-      )}
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-blue-700 text-center">Feedback Form</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="name"
-          placeholder="Your Name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          className="w-full border px-4 py-2 rounded"
-        />
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Your Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
 
-        <input
-          type="number"
-          name="rating"
-          placeholder="Rating (1-5)"
-          min="1"
-          max="5"
-          value={formData.rating}
-          onChange={handleChange}
-          required
-          className="w-full border px-4 py-2 rounded"
-        />
+          <input
+            type="number"
+            placeholder="Rating (1-5)"
+            value={rating}
+            onChange={(e) => setRating(e.target.value)}
+            className="w-full mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            min="1"
+            max="5"
+            required
+          />
 
-        <textarea
-          name="feedback"
-          placeholder="Your Feedback"
-          value={formData.feedback}
-          onChange={handleChange}
-          required
-          className="w-full border px-4 py-2 rounded"
-        />
+          <textarea
+            placeholder="Your Feedback"
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            className="w-full mb-4 px-4 py-2 border border-gray-300 rounded h-28 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          ></textarea>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-        >
-          Submit
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+          >
+            Submit
+          </button>
+        </form>
 
-      
+        {msg && (
+          <p
+            className={`mt-4 text-center font-medium ${
+              isError ? 'text-red-600' : 'text-green-600'
+            }`}
+          >
+            {msg}
+          </p>
+        )}
+      </div>
     </div>
   );
-};
+}
 
 export default FeedbackForm;
